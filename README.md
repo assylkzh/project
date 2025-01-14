@@ -190,19 +190,3 @@ python script_name.py
 - **Scatter Plots**: Explore relationships between traffic volume and key features.
 - **Actual vs. Predicted Plot**: Visualize the Random Forest model predictions against actual values.
 
-## Notes
-
-- Ensure the input data file exists and follows the required format.
-- The script assumes the presence of specific columns such as `traffic_volume` and `date_time`. Modify the script if your dataset differs.
-
-## Future Enhancements
-
-- Automate hyperparameter tuning for outlier detection methods.
-- Incorporate advanced feature selection techniques.
-- Add support for additional data formats (e.g., Excel, JSON).
-- Experiment with other regression models to improve prediction accuracy.
-
-## License
-
-This project is open-source and available under the MIT License.
-
