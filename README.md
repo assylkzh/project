@@ -51,8 +51,6 @@ I split the data into training and testing sets (80% for training, 20% for testi
 ## Results 
 The RandomForestRegressor achieved an R2 score of 0.7559 on the test data, indicating a good fit.
 
-
-
 ## Referenes for data 
 1.	https://www.tomtom.com/products/tomtom-move/ 
 2.	https://open-meteo.com/ 
