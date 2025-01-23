@@ -1,25 +1,30 @@
-# Traffic Data Preprocessing and Analysis
+# Traffic volume prediction 
 
-This README provides an overview of the Python script used to preprocess and analyze traffic volume data. The script is designed to clean, visualize, and transform raw data into a format suitable for further analysis or modeling.
+This README provides an overview of the  Smart traffic light management system project. 
+
+Problem Statement: 
+Nowadays, urban areas are  facing increasing traffic jams problems due to growing populations and proportionally, vehicle numbers which lead to longer travel times. And since current traffic management systems are often operated on pre-set signal timings, the city transport systems are now significantly inefficient. 
+
 
 ## Project Description
 
-The goal of this project is to analyze traffic volume data and preprocess it for machine learning models or other statistical analyses. The dataset includes information about traffic volume and various environmental and temporal factors such as weather, holidays, and time of day.
+The Smart Traffic Management System is a system that uses predictions based on Machine Learning and traffic light adjustment algorithms to optimise city traffic flow in real-time. The logic of a system is that it will dynamically adjust traffic light timings depending on a current traffic situation on the road that will be predicted using ML models. 
 
-## Features
+## Project overview
+Overall, the project implemented 2 models  for Traffic volume prediction: 1- using real-life (approaches_prediction.ipynb), real-time data that was collected manually using API in Astana city, and 2 - using synthetic open-source data that was collected from the Kaggle database(traffic_volume_prediction). Furthermore, 2 traffic light adjustment algorithms were created (one fully working and integrated with ML part,  and the second one is the demo version,working without ML).
 
-- **Data Loading**: Load traffic volume data from a CSV file.
-- **Data Cleaning**: Handle missing values and outliers.
-- **Feature Engineering**: Transform and encode categorical and numerical features.
-- **Data Scaling**: Scale numerical features to a uniform range using MinMaxScaler.
-- **Visualization**: Generate histograms, scatter plots, boxplots, and correlation heatmaps.
-- **Data Export**: Save the preprocessed data to a new CSV file.
-- **Modeling**: Train a Random Forest model to predict traffic volume.
+## About Data
+
+The data for the project were collected from 4 sources. All the referenes are given bellow. 
+- **TomTom API Traffic Flow Data** 
+- **TomTom API Junction Data** 
+- **Historical Weather API Data from Open-Meteo**
+- **Kaggle Dataset : "traffic-volume-dataset"**
 
 ## File Structure
 
-- **`traffic-volume.csv`**: Raw dataset containing traffic and environmental data.
-- **`traffic-volume_processed_data.csv`**: Processed dataset ready for analysis.
+- **`approaches_prediction.ipynb`**: Prediction for the traffic volume using Real-Life data collected in Astana using TomTom Api and merged with weather data from Open-Meteo API. 
+- **`traffic_volume_prediction`**:  Prediction for the traffic volume using synthetic open-source collected from the Kaggle database(traffic_volume_prediction)
 - **Python Script**: The main script performs data preprocessing and visualization.
 
 ## Prerequisites
@@ -31,162 +36,61 @@ The goal of this project is to analyze traffic volume data and preprocess it for
   - `matplotlib`
   - `seaborn`
   - `sklearn`
+- Django==3.2.5
 
 Install the required libraries using:
 ```bash
 pip install pandas numpy matplotlib seaborn scikit-learn
 ```
 
-## Script Workflow
+## Data and Database 
+Fistly, I preprocessed the data from '2024_10_10_11_36_33_definition.csv' csv file.
 
-1. **Load Data**:
-   - The script reads the dataset from the specified file path using `pandas`.
+The explanation of the features of the csv file:
 
-2. **Exploratory Data Analysis (EDA)**:
-   - Display summary statistics using `data.describe()` and check for missing values.
-   - Visualize data distributions and relationships using histograms, scatter plots, and boxplots.
+id -   id is related to each separate approach and exit of our junction.
+type - connected to the "id" column, it indicates which segmented pathway it's related to, the approach
+of our junction, or one its exits.
+name - the name of each approach and exit, it also contains information about the road direction.
+roadName - the name of the road where each approach and exit lines are located.
+direction - information about the direction of the traffic flow on a given approach or exit.
+frc - information about the road class. One of the values: 0 , 1 , 2 , 3 , 4 , 5 , 6 , 7. The lower this number
+is, the bigger the road it's related to (0 being a motorway).
+length - information about the length of a given approach (in meters).
+oneWayRoad - indicates if the approach or exit is a one-way road (if the value is "False" then it means
+the road is bi-directional)
+excluded – indicates if the junction approach was excluded from the results or not (for example disabled
+via toggle in the web application).
+driveable - this value provides information if this specific road section (the approach or the exit) is
+classified as "drivable" on our map.
+dataNotAvailable – in case there is something wrong with any of the approaches (errors in processing
+the data), this value will be set to “True” and there won’t be any data for it.
 
-3. **Data Cleaning**:
-   - Handle missing values by filling or imputing them.
-   - Remove outliers using the IQR method and Isolation Forest.
+From this file I retrieved all columns, and created 'traffic-system' database in PostgreSQL. Then, created the table called 'traffic-main' and imported all the columns and rows to the 'traffic-main' table.
 
-4. **Feature Engineering**:
-   - Extract new features such as `year`, `month`, `day`, `hour`, and `day_of_week` from the `date_time` column.
-   - Encode categorical features using one-hot encoding and frequency encoding.
 
-5. **Data Scaling**:
-   - Normalize numerical features to a range of [0, 1] using `MinMaxScaler`.
 
-6. **Model Training and Evaluation**:
-   - Split the data into training and testing sets.
-   - Train a Random Forest model using the training data.
-   - Evaluate the model's performance using RMSE, MAE, and R^2 metrics.
+The next is 'approaches.csv' file.
 
-7. **Visualization**:
-   - Generate plots to compare actual and predicted traffic volume.
+Data structure explanation:
 
-8. **Save Processed Data**:
-   - Save the cleaned and transformed data to a new CSV file.
+approachID – a unique ID number assigned to this specific approach line
+travelTimeSec - information on how long (in seconds) it currently takes for the vehicles to travel through the approach
+freeFlowTravelTime - information on how long (in seconds) it takes for the vehicles to travel through the approach during free-flow conditions( when there is no traffic jams, etc)
+delaySec - the current delay (in seconds)
+usualDelaySec - this is the usual delay that is expected at this time of day
+Stops - the average number of stops per vehicle on the approach
+queueLengthMeters - information on how long (in meters) the current line of vehicles waiting on the junction approach is
+volumePerHour - an estimated value of how many vehicles we observe traveling through the approach per hour
+isClosed – information if the approach was closed for traffic
+stopsHistogram - a container that stores histogram data specific to stops ( example: 0,3 is displaying the data like this: "numberOfStops": 0, "numberOfVehicles": 3)
 
-## Key Functions
+For this data I created 'approaches' table in the same database (traffic-system) and imported all the data from the csv to the table.
 
-### Data Loading
-```python
-def load_dataset(file_path):
-    return pd.read_csv(file_path)
-```
+##
 
-### Handling Missing Values
-```python
-def handle_null_values(df):
-    data = df.copy()
-    data['is_holiday'] = data['is_holiday'].fillna('no').apply(lambda x: 'yes' if x != 'no' else 'no')
-    return data
-```
 
-### Outlier Detection and Removal
-```python
-def apply_iqr(df, iqr_columns):
-    ...
-
-def apply_isolation_forest(df, if_columns, contamination=0.01):
-    ...
-```
-
-### Feature Engineering
-```python
-def transform_data(df):
-    ...
-
-def encode_data(df):
-    ...
-```
-
-### Data Scaling
-```python
-def scale_data(df, is_train):
-    ...
-```
-
-### Preprocessing Pipeline
-```python
-def preprocess_data(df, is_train):
-    ...
-```
-
-### Model Training and Evaluation
-```python
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.ensemble import RandomForestRegressor
-import matplotlib.pyplot as plt
-
-def train_model(X_train, y_train):
-    rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
-    rf_model.fit(X_train, y_train)
-    return rf_model
-
-def display_prediction(model, X_train, y_train, X_test, y_test):
-    train_predictions = model.predict(X_train)
-    print("-" * 30)
-    print("Training RMSE:", mean_squared_error(y_train, train_predictions, squared=False))
-    print("Training MAE:", mean_absolute_error(y_train, train_predictions))
-    print("Training R^2:", r2_score(y_train, train_predictions))
-    print("-" * 30)
-
-    test_predictions = model.predict(X_test)
-    print("Test RMSE:", mean_squared_error(y_test, test_predictions, squared=False))
-    print("Test MAE:", mean_absolute_error(y_test, test_predictions))
-    print("Test R^2:", r2_score(y_test, test_predictions))
-    print("-" * 30)
-
-    return train_predictions, test_predictions
-
-def plot_results(y_test, test_predictions):
-    plt.figure(figsize=(12, 6))
-    plt.subplot(1, 2, 1)
-    plt.scatter(y_test, test_predictions, alpha=0.6)
-    plt.plot([y_test.min(), y_test.max()], 
-             [y_test.min(), y_test.max()],
-             'r--', lw=2)
-    plt.title('Actual vs Predicted Traffic Volume')
-    plt.xlabel('Actual Traffic Volume')
-    plt.ylabel('Predicted Traffic Volume')
-    plt.grid(True)
-    plt.show()
-```
-
-### Main Process
-```python
-def process():
-    file_path = '/path/to/traffic-volume_processed_data.csv'
-    data = pd.read_csv(file_path)
-
-    X = data.drop(columns=['traffic_volume'])
-    y = data['traffic_volume']
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    rf_model = train_model(X_train, y_train)
-
-    train_preds, test_preds = display_prediction(rf_model, X_train, y_train, X_test, y_test)
-
-    plot_results(y_test, test_preds)
-```
-
-## Usage
-
-1. Update the `file_path` variable in the script to the location of your dataset.
-2. Run the script using:
-```bash
-python script_name.py
-```
-3. The preprocessed dataset will be saved to the specified output file path, and the model evaluation results will be displayed.
-
-## Visualizations
-
-- **Correlation Heatmap**: Displays the correlation between numerical features.
-- **Histograms**: Visualize the distribution of numerical features.
-- **Boxplots**: Compare traffic volume on holidays vs. non-holidays.
-- **Scatter Plots**: Explore relationships between traffic volume and key features.
-- **Actual vs. Predicted Plot**: Visualize the Random Forest model predictions against actual values.
-
+## Referenes for data 
+1.	https://www.tomtom.com/products/tomtom-move/ 
+2.	https://open-meteo.com/ 
+3.	https://www.kaggle.com/datasets/rohith203/traffic-volume-dataset 
