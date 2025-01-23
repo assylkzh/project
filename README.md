@@ -1,4 +1,4 @@
-# Traffic volume prediction 
+# Smart traffic light management system project
 
 This README provides an overview of the  Smart traffic light management system project. 
 
